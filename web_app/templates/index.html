@@ -1,0 +1,936 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <title>Dashboard Deteksi TB - {{ username }}</title>
+    <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    <style>
+        /* BASE STYLES */
+        body { 
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; 
+            background-color: #e9ecef; 
+            color: #343a40; 
+            margin: 0; 
+            padding: 0; 
+        }
+        .container { 
+            max-width: 1000px;
+            width: 100%;
+            background: #fff; 
+            padding: 40px; 
+            border-radius: 12px; 
+            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.15); 
+            margin: 40px auto;
+        }
+        h2 { 
+            text-align: center; 
+            color: #007bff; 
+            margin-bottom: 30px; 
+            font-weight: 600;
+        }
+        .header-info {
+            display: flex; 
+            justify-content: space-between; 
+            margin-bottom: 15px; 
+            font-size: 0.95em;
+            border-bottom: 1px solid #dee2e6;
+            padding-bottom: 10px;
+        }
+        
+        /* INPUT & FORM STYLES */
+        .input-section {
+            padding: 20px;
+            border: 1px solid #dee2e6;
+            border-radius: 8px;
+            background-color: #f8f9fa;
+        }
+        .patient-details { 
+            display: grid; 
+            grid-template-columns: repeat(4, 1fr);
+            gap: 15px; 
+            margin-bottom: 20px;
+        }
+        .patient-details input, .patient-details select, .patient-details textarea {
+            padding: 10px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            box-sizing: border-box;
+            font-size: 0.9em;
+        }
+        .form-row {
+            display: flex;
+            gap: 15px;
+            align-items: center;
+        }
+        .upload-area { 
+            flex: 1;
+            border: 3px dashed #ced4da; 
+            padding: 20px; 
+            text-align: center; 
+            border-radius: 8px; 
+            cursor: pointer; 
+            background-color: #fff;
+        }
+        .btn-diagnosis {
+            padding: 10px 20px; 
+            background-color: #28a745; 
+            color: white; 
+            border: none; 
+            border-radius: 5px; 
+            cursor: pointer;
+            font-size: 1.05em;
+        }
+
+        /* RESULTS SECTION */
+        .results-section { 
+            margin-top: 30px; 
+            padding: 25px; 
+            border: 1px solid #adb5bd; 
+            border-radius: 8px; 
+            background-color: #f0f0f0;
+            display: flex;
+            gap: 30px;
+            align-items: flex-start;
+        }
+        .result-details {
+            flex: 1;
+            border-right: 1px solid #dee2e6;
+            padding-right: 20px;
+        }
+        .result-text { 
+            font-size: 1.1em; 
+            margin-bottom: 10px; 
+        }
+        .danger { 
+            color: #dc3545; 
+            font-weight: bold; 
+            font-size: 1.3em;
+        }
+        .success { 
+            color: #28a745; 
+            font-weight: bold; 
+            font-size: 1.3em;
+        }
+        #image-preview { 
+            max-width: 300px;
+            height: auto;
+            border: 2px solid #333; 
+            border-radius: 4px; 
+        }
+
+        /* RIWAYAT / LOG TABLE */
+        .log-section {
+            margin-top: 30px;
+        }
+        .log-section table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 15px;
+        }
+        .log-section th, .log-section td {
+            border: 1px solid #ddd;
+            padding: 10px;
+            text-align: left;
+            font-size: 0.9em;
+        }
+        .log-section th {
+            background-color: #007bff;
+            color: white;
+            font-weight: 600;
+        }
+        .tb-positive { background-color: #f8d7da; color: #721c24; }
+        .tb-negative { background-color: #d4edda; color: #155724; }
+
+        /* ACTION BUTTONS */
+        .btn-action {
+            padding: 0 10px; /* Use line-height for vertical centering */
+            min-width: 70px;
+            height: 30px; /* Explicit height */
+            line-height: 30px; /* Equal to height for vertical centering */
+            text-align: center;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            color: white;
+            text-decoration: none; /* For the <a> tag */
+            display: inline-block; /* For the <a> tag to respect width/padding */
+            vertical-align: middle; /* Align elements consistently */
+            margin-right: 5px; /* Keep spacing */
+            box-sizing: border-box; /* Include padding in width calculation */
+        }
+
+        /* MODAL STYLES */
+        .custom-modal {
+            display: none; 
+            position: fixed; 
+            z-index: 1000; 
+            left: 0;
+            top: 0;
+            width: 100%; 
+            height: 100%; 
+            overflow: auto; 
+            background-color: rgba(0,0,0,0.6); 
+        }
+        .modal-content {
+            background-color: #fefefe;
+            padding: 25px;
+            border: 1px solid #888;
+            width: 80%;
+            max-width: 700px;
+            border-radius: 8px;
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+        }
+        .close-btn {
+            color: #aaa;
+            position: absolute;
+            top: 10px;
+            right: 20px;
+            font-size: 28px;
+            font-weight: bold;
+        }
+        .close-btn:hover,
+        .close-btn:focus {
+            color: black;
+            text-decoration: none;
+            cursor: pointer;
+        }
+
+        /* SCAN MODAL CSS */
+        .scan-modal-overlay {
+            display: none;
+            position: fixed;
+            z-index: 2000;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.75);
+            justify-content: center;
+            align-items: center;
+        }
+        .scan-modal-content {
+            position: relative;
+        }
+        .scan-image-container {
+            position: relative;
+            width: 400px;
+            height: 400px;
+            background: #000;
+            border: 2px solid #007bff;
+            border-radius: 8px;
+            overflow: hidden;
+        }
+        #scan-image-preview {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+        .scan-line {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 3px;
+            background: linear-gradient(90deg, transparent, rgba(0, 123, 255, 0.8), transparent);
+            box-shadow: 0 0 10px rgba(0, 123, 255, 1);
+            animation: scan-animation 4s infinite linear;
+        }
+        @keyframes scan-animation {
+            0% { transform: translateY(0); }
+            100% { transform: translateY(400px); }
+        }
+
+        .success-modal-content {
+            background-color: #fff;
+            color: #28a745;
+            text-align: center;
+            padding: 40px;
+            border-radius: 15px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.3);
+        }
+
+        /* RESPONSIVE STYLES */
+        @media (max-width: 768px) {
+            .container {
+                padding: 20px;
+                margin: 20px auto;
+            }
+            .patient-details {
+                display: flex; /* Change to flexbox */
+                flex-direction: column; /* Stack items vertically */
+                gap: 10px; /* Adjust gap for stacked items */
+            }
+            .patient-details input, 
+            .patient-details select,
+            .patient-details textarea {
+                width: 100%; /* Ensure full width for inputs and select */
+            }
+            .patient-details textarea {
+                grid-column: auto; /* Reset grid-column for flexbox */
+            }
+            .form-row {
+                flex-direction: column; /* Stack upload area and button */
+            }
+            .results-section {
+                flex-direction: column; /* Stack result details and image */
+                gap: 20px;
+            }
+            .result-details {
+                border-right: none; /* Remove vertical line */
+                padding-right: 0;
+            }
+            #image-preview {
+                max-width: 100%; /* Ensure image is responsive */
+                align-self: center;
+            }
+            #modal-body-content {
+                flex-direction: column;
+                align-items: center;
+            }
+            #modal-image {
+                max-width: 100%; /* Ensure modal image is responsive */
+            }
+            .log-section th, .log-section td {
+                padding: 6px;
+                font-size: 0.8em;
+            }
+            .table-responsive-wrapper {
+                overflow-x: auto; /* Make table scrollable horizontally */
+            }
+            .btn-action {
+                min-width: 60px;
+                height: 28px;
+                line-height: 28px;
+                font-size: 0.9em;
+            }
+        }
+    </style>
+</head>
+<body>
+    <nav class="navbar navbar-expand-lg navbar-light bg-light">
+        <div class="container-fluid">
+            <a class="navbar-brand" href="{{ url_for('home') }}">
+                <i class="fa-solid fa-lungs-virus"></i> Deteksi TB
+            </a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav ms-auto">
+                    <li class="nav-item">
+                        <a class="nav-link" href="{{ url_for('home') }}">Beranda</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link active" aria-current="page" href="{{ url_for('deteksi') }}">Deteksi</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="{{ url_for('about_contact') }}">Tentang & Kontak</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="#" id="ask-ai-popover" title="AI Assistant">Tanya AI</a>
+                    </li>
+                    {% if current_user.is_authenticated %}
+                    <li class="nav-item">
+                        <a class="nav-link" href="{{ url_for('logout') }}">Logout ({{ current_user.username }})</a>
+                    </li>
+                    {% else %}
+                    <li class="nav-item">
+                        <a class="nav-link" href="{{ url_for('login') }}">Login</a>
+                    </li>
+                    {% endif %}
+                </ul>
+            </div>
+        </div>
+    </nav>
+    <div class="container">
+        <h2>Silahkan Isi Data & Mulai Deteksi</h2>
+
+        
+        {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+                {% for category, message in messages %}
+                    <div class="flash-message {{ category }}">{{ message }}</div>
+                {% endfor %}
+            {% endif %}
+        {% endwith %}
+
+        <form id="upload-form">
+            <div class="input-section">
+                <h4 style="color: #007bff; margin-top: 0;">1. Data Pasien</h4>
+                <div class="patient-details">
+                    <input type="text" name="patient_name" placeholder="Nama Lengkap" required>
+                    <input type="number" name="patient_age" placeholder="Umur (thn)" min="1" required>
+                    <input type="text" name="patient_id" placeholder="ID Pasien/No. RM" required>
+                    <select name="patient_gender" required>
+                        <option value="" disabled selected>Pilih Jenis Kelamin</option>
+                        <option value="Laki-laki">Laki-laki</option>
+                        <option value="Perempuan">Perempuan</option>
+                    </select>
+                    <textarea name="patient_address" placeholder="Alamat Lengkap" style="grid-column: 1 / span 4;"></textarea>
+                </div>
+
+                <h4 style="color: #007bff;">2. Unggah Citra & Diagnosis</h4>
+                <div class="form-row">
+                    <label for="image-upload" class="upload-area">
+                        <span class="upload-text">Klik di sini atau Seret Citra X-ray (.png/.jpg)</span>
+                        <input type="file" id="image-upload" name="file" accept="image/*" required style="display:none;">
+                    </label>
+                    <button type="submit" class="btn-diagnosis">
+                        Jalankan Diagnosis Model
+                    </button>
+                </div>
+            </div>
+        </form>
+
+        <div id="results-area">
+            <div class="results-section">
+                <div class="result-details">
+                    <h3 style="color: #007bff;">3. Hasil Diagnosis:</h3>
+                    <div class="result-text">
+                        Diagnosis: <span id="prediction-class" class="result-text">Pilih citra untuk memulai...</span>
+                    </div>
+                    <div class="result-text">
+                        Keyakinan Model: <span id="confidence">N/A</span>
+                    </div>
+                    <div id="diagnosis-description" style="margin-top: 20px; font-size: 0.9em;"></div>
+                    <p style="margin-top: 20px; font-size: 0.8em; color: #6c757d;">
+                        *Diagnosis ini adalah hasil AI dan bukan merupakan diagnosis klinis final.
+                    </p>
+                </div>
+                
+                <img id="image-preview" src="" alt="Citra X-ray Hasil Diagnosis" style="display: none;">
+            </div>
+        </div>
+
+        <div class="log-section">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
+                <h3 style="color: #007bff; margin: 0;">4. Riwayat Diagnosis</h3>
+                <input type="text" id="search-patient" placeholder="Cari nama pasien..." style="padding: 8px; width: 280px; border-radius: 4px; border: 1px solid #ccc;">
+            </div>
+            <div class="table-responsive-wrapper">
+                <table id="diagnosis-history-table">
+                    <thead>
+                        <tr>
+                            <th>Waktu</th>
+                            <th>No. RM</th>
+                            <th>Nama Pasien</th>
+                            <th>Umur/JK</th>
+                            <th>Diagnosis AI</th>
+                            <th>Keyakinan</th>
+                            <th>Aksi</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% if history %}
+                            {% for item in history %}
+                                <tr class="{{ 'tb-positive' if item.prediction_result == 'Tuberculosis' else 'tb-negative' }}">
+                                    <td>{{ item.timestamp.strftime('%Y-%m-%d %H:%M') }}</td>
+                                    <td>{{ item.patient_id }}</td>
+                                    <td>{{ item.patient_name }}</td>
+                                    <td>{{ item.patient_age }} thn / {{ item.patient_gender }}</td>
+                                    <td>{{ item.prediction_result }}</td>
+                                    <td>{{ item.confidence }}</td>
+                                    <td>
+                                        <a href="{{ url_for('edit_history', history_id=item.id) }}" class="btn-action" style="background-color: #007bff;">
+                                            Edit
+                                        </a>
+                                        <button class="btn-action btn-desc"
+                                                data-prediction="{{ item.prediction_result }}"
+                                                data-image-url="{{ item.image_path }}"
+                                                data-patient-name="{{ item.patient_name }}"
+                                                data-patient-id="{{ item.patient_id }}"
+                                                data-history-id="{{ item.id }}"
+                                                style="background-color: #17a2b8;">
+                                            Detail
+                                        </button>
+                                        <form method="POST" action="{{ url_for('delete_history', history_id=item.id) }}" style="display:inline;" onsubmit="return confirm('Apakah Anda yakin ingin menghapus riwayat ini?');">
+                                            <button type="submit" class="btn-action" style="background-color: #dc3545; margin-right: 0;">
+                                                Hapus
+                                            </button>
+                                        </form>
+                                    </td>
+                                </tr>
+                            {% endfor %}
+                        {% else %}
+                            <tr>
+                                <td colspan="7" style="text-align: center; padding: 20px;">Belum ada riwayat diagnosis.</td>
+                            </tr>
+                        {% endif %}
+                    </tbody>
+                </table>
+            </div>
+            <div style="text-align: right; margin-top: 20px;">
+                <a href="{{ url_for('download_excel') }}" class="btn btn-success">
+                    <i class="fa-solid fa-file-excel"></i> Unduh Semua Laporan (Excel)
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <!-- Description Modal -->
+    <div id="description-modal" class="custom-modal">
+        <div class="modal-content">
+            <span class="close-btn">&times;</span>
+            <div id="modal-body-content" style="display: flex; gap: 20px;">
+                <img id="modal-image" src="" style="max-width: 300px; height: auto; border-radius: 4px;">
+                <div id="modal-text-content"></div>
+            </div>
+            <a href="#" id="download-pdf-btn" class="btn-action" style="background-color: #007bff; margin-top: 15px; text-align: center;">Unduh Hasil Laporan</a>
+        </div>
+    </div>
+
+    <!-- Scan Modal -->
+    <div id="scan-modal" class="scan-modal-overlay">
+        <div class="scan-modal-content">
+            <h4 style="color: #fff; text-align: center;">Menganalisis Citra...</h4>
+            <div class="scan-image-container">
+                <img id="scan-image-preview" src="">
+                <div class="scan-line"></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Success Modal -->
+    <div id="success-modal" class="scan-modal-overlay">
+        <div class="success-modal-content">
+            <i class="fas fa-check-circle" style="font-size: 80px; margin-bottom: 20px;"></i>
+            <h2>Diagnosis Selesai!</h2>
+            <p>Hasil diagnosis kini ditampilkan di bawah. Riwayat diagnosis akan diperbarui saat halaman dimuat ulang.</p>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        function getDiagnosisDescriptionHTML(prediction) {
+            if (prediction === 'Tuberculosis') {
+                return `
+                    <h5 style="color: #721c24;">Deskripsi Kondisi Paru-paru:</h5>
+                    <p>Hasil analisis citra menunjukkan adanya indikasi <strong>Tuberkulosis (TB)</strong>.</p>
+                    <h5 style="color: #721c24; margin-top: 15px;">Saran & Tindak Lanjut:</h5>
+                    <ul style="padding-left: 20px;">
+                        <li><strong>Segera konsultasikan</strong> hasil ini dengan dokter atau spesialis paru untuk pemeriksaan lebih lanjut.</li>
+                        <li>Hindari kontak dekat dengan orang lain untuk mencegah penularan.</li>
+                        <li>Selalu kenakan masker dan praktikkan etika batuk yang benar.</li>
+                    </ul>
+                `;
+            } else {
+                return `
+                    <h5 style="color: #155724;">Deskripsi Kondisi Paru-paru:</h5>
+                    <p>Hasil analisis citra menunjukkan kondisi paru-paru <strong>Normal</strong>.</p>
+                    <h5 style="color: #155724; margin-top: 15px;">Tips Menjaga Kesehatan Paru-paru:</h5>
+                    <ul style="padding-left: 20px;">
+                        <li>Jaga pola hidup sehat dengan tidak merokok dan menghindari asap rokok.</li>
+                        <li>Rutin berolahraga untuk meningkatkan kapasitas dan fungsi paru-paru.</li>
+                        <li>Konsumsi makanan bergizi seimbang.</li>
+                    </ul>
+                `;
+            }
+        }
+
+        function addHistoryRow(item) {
+            if (!item) return;
+
+            const tableBody = document.getElementById('diagnosis-history-table').getElementsByTagName('tbody')[0];
+            const noHistoryRow = tableBody.querySelector('td[colspan="7"]');
+            if (noHistoryRow) {
+                noHistoryRow.parentElement.remove();
+            }
+
+            const rowClass = item.prediction_result === 'Tuberculosis' ? 'tb-positive' : 'tb-negative';
+            
+            const actionButtonsHTML = `
+                <a href="/edit/${item.id}" class="btn-action" style="background-color: #007bff;">
+                    Edit
+                </a>
+                <button class="btn-action btn-desc"
+                        data-prediction="${item.prediction_result}"
+                        data-image-url="${item.image_path}"
+                        data-patient-name="${item.patient_name}"
+                        data-patient-id="${item.patient_id}"
+                        data-history-id="${item.id}"
+                        style="background-color: #17a2b8;">
+                    Detail
+                </button>
+                <form method="POST" action="/delete/${item.id}" style="display:inline;" onsubmit="return confirm('Apakah Anda yakin ingin menghapus riwayat ini?');">
+                    <button type="submit" class="btn-action" style="background-color: #dc3545; margin-right: 0;">
+                        Hapus
+                    </button>
+                </form>
+            `;
+
+            const newRowHTML = `
+                <tr class="${rowClass}" id="history-row-${item.id}">
+                    <td>${item.timestamp}</td>
+                    <td>${item.patient_id}</td>
+                    <td>${item.patient_name}</td>
+                    <td>${item.patient_age_gender}</td>
+                    <td>${item.prediction_result}</td>
+                    <td>${item.confidence}</td>
+                    <td>${actionButtonsHTML}</td>
+                </tr>
+            `;
+
+            tableBody.insertAdjacentHTML('afterbegin', newRowHTML);
+
+            const newDetailButton = tableBody.querySelector(`button.btn-desc[data-history-id="${item.id}"]`);
+            if (newDetailButton) {
+                newDetailButton.addEventListener('click', function() {
+                    const prediction = this.dataset.prediction;
+                    const imageUrl = this.dataset.imageUrl;
+                    const patientName = this.dataset.patientName;
+                    const patientId = this.dataset.patientId;
+                    const historyId = this.dataset.historyId;
+
+                    const modalText = `<h4>Pasien: ${patientName} (${patientId})</h4>` + getDiagnosisDescriptionHTML(prediction);
+                    
+                    document.getElementById('modal-image').src = imageUrl;
+                    document.getElementById('modal-text-content').innerHTML = modalText;
+                    document.getElementById('download-pdf-btn').href = `/download_pdf/${historyId}`;
+                    document.getElementById('description-modal').style.display = 'block';
+                });
+            }
+        }
+
+        // --- Event Listeners ---
+        document.addEventListener('DOMContentLoaded', function () {
+            const descModal = document.getElementById('description-modal');
+            const closeBtn = descModal.querySelector('.close-btn');
+            closeBtn.onclick = () => { descModal.style.display = "none"; };
+            // Make the backdrop click listener specific to the description modal to avoid conflicts
+            descModal.onclick = (event) => {
+                // Close only if the dark backdrop (the modal container itself) is clicked
+                if (event.target == descModal) {
+                    descModal.style.display = "none";
+                }
+            };
+
+            document.querySelectorAll('.btn-desc').forEach(button => {
+                button.addEventListener('click', function() {
+                    const prediction = this.dataset.prediction;
+                    const imageUrl = this.dataset.imageUrl;
+                    const patientName = this.dataset.patientName;
+                    const patientId = this.dataset.patientId;
+                    const historyId = this.dataset.historyId;
+
+                    const modalText = `<h4>Pasien: ${patientName} (${patientId})</h4>` + getDiagnosisDescriptionHTML(prediction);
+                    
+                    const modal = document.getElementById('description-modal');
+                    const modalContent = modal.querySelector('.modal-content');
+
+                    document.getElementById('modal-image').src = imageUrl;
+                    document.getElementById('modal-text-content').innerHTML = modalText;
+                    
+                    const downloadBtn = document.getElementById('download-pdf-btn');
+                    downloadBtn.href = `/download_pdf/${historyId}`;
+
+                    modal.style.display = 'block';
+                });
+            });
+
+            const searchPatientInput = document.getElementById('search-patient');
+            if (searchPatientInput) {
+                const historyTable = document.getElementById('diagnosis-history-table');
+                const tableBody = historyTable.getElementsByTagName('tbody')[0];
+                const tableRows = tableBody.getElementsByTagName('tr');
+
+                searchPatientInput.addEventListener('keyup', function() {
+                    const searchTerm = this.value.toLowerCase();
+
+                    for (const row of tableRows) {
+                        const noHistoryRow = row.querySelector('td[colspan="7"]');
+                        if (noHistoryRow) continue;
+
+                        const patientNameCell = row.getElementsByTagName('td')[2];
+                        if (patientNameCell) {
+                            const patientName = patientNameCell.textContent || patientNameCell.innerText;
+                            if (patientName.toLowerCase().includes(searchTerm)) {
+                                row.style.display = '';
+                            } else {
+                                row.style.display = 'none';
+                            }
+                        }
+                    }
+                });
+            }
+
+            document.getElementById('image-upload').addEventListener('change', function(event) {
+                const file = event.target.files[0];
+                if (file) {
+                    const reader = new FileReader();
+                    reader.onload = function(e) {
+                        const preview = document.getElementById('image-preview');
+                        preview.src = e.target.result;
+                        preview.style.display = 'block';
+                        document.getElementById('prediction-class').textContent = 'Siap Diagnosis...';
+                        document.getElementById('confidence').textContent = 'N/A';
+                        document.getElementById('diagnosis-description').innerHTML = '';
+                    }
+                    reader.readAsDataURL(file);
+                }
+            });
+
+            document.getElementById('upload-form').addEventListener('submit', async function(event) {
+                event.preventDefault();
+                
+                const formData = new FormData(this);
+                const fileInput = document.getElementById('image-upload');
+                const submitButton = this.querySelector('.btn-diagnosis');
+                const scanModal = document.getElementById('scan-modal');
+                const scanImagePreview = document.getElementById('scan-image-preview');
+
+                if (fileInput.files.length === 0) {
+                    alert('Silakan pilih file citra untuk didiagnosis.');
+                    return;
+                }
+
+                const reader = new FileReader();
+                reader.onload = function(e) { scanImagePreview.src = e.target.result; }
+                reader.readAsDataURL(fileInput.files[0]);
+                scanModal.style.display = 'flex';
+                
+                submitButton.disabled = true;
+                submitButton.textContent = 'Menganalisis...';
+                submitButton.style.backgroundColor = '#6c757d';
+
+                try {
+                    const response = await fetch('/predict', { method: 'POST', body: formData });
+                    const data = await response.json();
+                    
+                    scanModal.style.display = 'none';
+
+                    if (data.error) {
+                        alert('Error: ' + data.error);
+                    } else {
+                        document.getElementById('prediction-class').textContent = data.prediction;
+                        document.getElementById('confidence').textContent = data.confidence;
+                        document.getElementById('diagnosis-description').innerHTML = getDiagnosisDescriptionHTML(data.prediction);
+
+                        const predictionSpan = document.getElementById('prediction-class');
+                        if (data.prediction === 'Tuberculosis') {
+                            predictionSpan.className = 'danger';
+                        } else {
+                            predictionSpan.className = 'success';
+                        }
+
+                        // Add the new row to the history table
+                        if (data.new_history) {
+                            addHistoryRow(data.new_history);
+                        }
+
+                        const successModal = document.getElementById('success-modal');
+                        successModal.style.display = 'flex';
+                        
+                        // Also reset the form and button state
+                        submitButton.disabled = false;
+                        submitButton.textContent = 'Jalankan Diagnosis Model';
+                        submitButton.style.backgroundColor = '#28a745';
+                        document.getElementById('upload-form').reset();
+
+
+                        setTimeout(() => { 
+                            successModal.style.display = 'none';
+                        }, 4000); // Increased timeout to allow user to read the new message
+                    }
+                } catch (error) {
+                    console.error('Fetch error:', error);
+                    alert('Terjadi kesalahan saat menghubungi server.');
+                    scanModal.style.display = 'none';
+                }
+            });
+        });
+    </script>
+
+            <!-- Popover Content -->
+
+            <div id="popover-content" class="d-none">
+
+                <div id="chat-messages-popover">
+
+                    <div class="bot-message">Halo! Ada yang bisa saya bantu?</div>
+
+                </div>
+
+                <div class="chat-input-area">
+
+                    <input type="text" id="chat-input-popover" class="form-control" placeholder="Ketik pesan...">
+
+                    <button id="chat-send-popover"><i class="fas fa-paper-plane"></i></button>
+
+                </div>
+
+            </div>
+
+        
+
+            <script>
+
+                // Popover Chat functionality
+                document.addEventListener('DOMContentLoaded', function () {
+                    const popoverTriggerEl = document.getElementById('ask-ai-popover');
+                    if (popoverTriggerEl) {
+                        const popover = new bootstrap.Popover(popoverTriggerEl, {
+                            html: true,
+                            placement: 'bottom',
+                            sanitize: false, // We are providing trusted content
+                            customClass: 'chat-popover', // Custom class for styling
+                            content: function () {
+                                return document.getElementById('popover-content').innerHTML;
+                            }
+                        });
+
+                        const handleOutsideClick = (event) => {
+                            // Close popover if click is outside of the popover and not on the trigger element
+                            if (!popoverTriggerEl.contains(event.target) && !document.querySelector('.popover')?.contains(event.target)) {
+                                popover.hide();
+                            }
+                        };
+
+                        popoverTriggerEl.addEventListener('shown.bs.popover', function () {
+                            // Add listener for outside clicks
+                            document.addEventListener('click', handleOutsideClick);
+
+                            const chatInputPopover = document.querySelector('.popover-body #chat-input-popover');
+                            const chatSendPopover = document.querySelector('.popover-body #chat-send-popover');
+                            const chatMessagesPopover = document.querySelector('.popover-body #chat-messages-popover');
+        
+                            const sendMessagePopover = () => {
+                                if (!chatInputPopover || !chatMessagesPopover) return;
+                                const messageText = chatInputPopover.value.trim();
+                                if (messageText === '') return;
+        
+                                const userMessageElem = document.createElement('div');
+                                userMessageElem.className = 'chat-message user-message';
+                                userMessageElem.textContent = messageText;
+                                chatMessagesPopover.appendChild(userMessageElem);
+                                
+                                chatInputPopover.value = '';
+                                chatMessagesPopover.scrollTop = chatMessagesPopover.scrollHeight;
+        
+                                fetch('/api/chat', {
+                                    method: 'POST',
+                                    headers: { 'Content-Type': 'application/json' },
+                                    body: JSON.stringify({ message: messageText }),
+                                })
+                                .then(response => response.json())
+                                .then(data => {
+                                    const botMessageElem = document.createElement('div');
+                                    botMessageElem.className = 'chat-message bot-message';
+                                    botMessageElem.innerHTML = marked.parse(data.response || "Maaf, terjadi kesalahan.");
+                                    chatMessagesPopover.appendChild(botMessageElem);
+                                    chatMessagesPopover.scrollTop = chatMessagesPopover.scrollHeight;
+                                })
+                                .catch((error) => {
+                                    console.error('Error:', error);
+                                });
+                            };
+        
+                            if (chatSendPopover) {
+                                chatSendPopover.onclick = sendMessagePopover;
+                            }
+                            if (chatInputPopover) {
+                                chatInputPopover.onkeypress = (e) => {
+                                    if (e.key === 'Enter') {
+                                        sendMessagePopover();
+                                    }
+                                };
+                            }
+                        });
+
+                        popoverTriggerEl.addEventListener('hidden.bs.popover', function () {
+                            // Remove listener when popover is hidden
+                            document.removeEventListener('click', handleOutsideClick);
+                        });
+                    }
+        
+                    // Ensure chat message styles are present
+                    if (!document.getElementById('chat-styles')) {
+                        const style = document.createElement('style');
+                        style.id = 'chat-styles';
+                        style.innerHTML = `
+                            .chat-popover {
+                                width: 360px; 
+                                border-radius: 0.75rem;
+                                border: none;
+                                box-shadow: 0 8px 30px rgba(0, 0, 0, 0.12);
+                            }
+                            .popover-header {
+                                background-color: #f8f9fa;
+                                border-bottom: 1px solid #dee2e6;
+                                font-weight: 600;
+                                font-size: 1rem;
+                            }
+                            .popover-body { 
+                                padding: 0; 
+                            }
+                            #chat-messages-popover {
+                                height: 300px; 
+                                overflow-y: auto; 
+                                display: flex; 
+                                flex-direction: column; 
+                                gap: 12px; 
+                                padding: 16px;
+                            }
+                            #chat-messages-popover::-webkit-scrollbar { width: 6px; }
+                            #chat-messages-popover::-webkit-scrollbar-track { background: #f1f1f1; }
+                            #chat-messages-popover::-webkit-scrollbar-thumb { background: #888; border-radius: 3px; }
+                            #chat-messages-popover::-webkit-scrollbar-thumb:hover { background: #555; }
+                            .chat-message { 
+                                padding: 10px 15px; 
+                                border-radius: 20px; 
+                                max-width: 85%; 
+                                word-wrap: break-word;
+                            }
+                            .user-message { 
+                                background-image: linear-gradient(to right, #0d6efd, #0a58ca);
+                                color: white; 
+                                align-self: flex-end; 
+                                border-bottom-right-radius: 5px;
+                            }
+                            .bot-message { 
+                                background-color: #e9ecef; 
+                                color: #343a40; 
+                                align-self: flex-start; 
+                                border-bottom-left-radius: 5px;
+                            }
+                            .chat-input-area {
+                                display: flex;
+                                align-items: center;
+                                padding: 10px;
+                                border-top: 1px solid #dee2e6;
+                            }
+                            #chat-input-popover {
+                                border: none;
+                                background-color: transparent;
+                                flex-grow: 1;
+                                padding: 8px;
+                            }
+                            #chat-input-popover:focus {
+                                outline: none;
+                                box-shadow: none;
+                            }
+                            #chat-send-popover {
+                                background: none;
+                                border: none;
+                                color: #007bff;
+                                font-size: 1.2rem;
+                                padding: 5px 10px;
+                                transition: color 0.2s;
+                            }
+                            #chat-send-popover:hover {
+                                color: #0056b3;
+                            }
+                        `;
+                        document.head.appendChild(style);
+                    }
+                });
+            </script>
+
+        </body>
+
+        </html>

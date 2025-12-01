@@ -1,0 +1,53 @@
+/* Timeline Container */
+.timeline {
+    position: relative;
+    padding-left: 30px;
+    border-left: 4px solid #0d6efd; /* Blue line */
+}
+
+/* Timeline Item */
+.timeline-item {
+    position: relative;
+    margin-bottom: 50px;
+}
+
+/* Timeline Dot */
+.timeline-dot {
+    position: absolute;
+    left: -37px; /* Adjust to center on the line */
+    top: 5px;
+    width: 15px;
+    height: 15px;
+    border-radius: 50%;
+    background-color: #0d6efd;
+}
+
+/* Timeline Content */
+.timeline-content {
+    position: relative;
+    top: -5px;
+}
+
+.timeline-content h5 {
+    font-weight: bold;
+}
+
+/* Contact Form Input */
+.contact-form-input {
+    border: 1px solid #0d6efd;
+    transition: border-width 0.2s ease-in-out;
+}
+
+.contact-form-input:focus {
+    border-width: 2px;
+    box-shadow: none;
+}
+
+/* Footer Icons */
+.footer a i {
+    transition: color 0.3s ease;
+}
+
+.footer a:hover i {
+    color: #0a58ca; /* Darker blue on hover */
+}

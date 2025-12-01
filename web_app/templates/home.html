@@ -1,0 +1,321 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Deteksi TB - Beranda</title>
+    <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+<body>
+
+    <!-- Header -->
+    <nav class="navbar navbar-expand-lg navbar-light bg-light">
+        <div class="container-fluid">
+            <a class="navbar-brand" href="#">
+                <i class="fa-solid fa-lungs-virus"></i> Deteksi TB
+            </a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav ms-auto">
+                    <li class="nav-item">
+                        <a class="nav-link active" aria-current="page" href="{{ url_for('home') }}">Beranda</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="{{ url_for('deteksi') }}">Deteksi</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="{{ url_for('about_contact') }}">Tentang & Kontak</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="#" id="ask-ai-popover" title="AI Assistant">Tanya AI</a>
+                    </li>
+                    {% if current_user.is_authenticated %}
+                    <li class="nav-item">
+                        <a class="nav-link" href="{{ url_for('logout') }}">Logout ({{ current_user.username }})</a>
+                    </li>
+                    {% else %}
+                    <li class="nav-item">
+                        <a class="nav-link" href="{{ url_for('login') }}">Login</a>
+                    </li>
+                    {% endif %}
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Hero Section -->
+    <header class="hero-section">
+        <div class="hero-overlay"></div>
+        <div class="container text-center hero-content">
+            <h1 class="display-4 fw-bold">Deteksi Tuberkulosis Cepat dan Akurat dengan AI</h1>
+            <a href="{{ url_for('deteksi') }}" class="btn btn-success btn-lg cta-button mt-4">Mulai Deteksi Sekarang</a>
+        </div>
+    </header>
+
+    <!-- Statistics Section -->
+    <section class="container my-5">
+        <div class="row text-center">
+            <div class="col-md-4">
+                <div class="card">
+                    <div class="card-body">
+                        <i class="fas fa-globe fa-3x text-primary mb-3"></i>
+                        <h5 class="card-title">
+                            <a href="https://www.who.int/indonesia/news/campaign/tb-day-2022/fact-sheets" target="_blank" rel="noopener noreferrer" class="stretched-link text-decoration-none text-dark">
+                                1,5 Juta Kematian per Tahun
+                            </a>
+                        </h5>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="card">
+                    <div class="card-body">
+                        <i class="fas fa-users fa-3x text-primary mb-3"></i>
+                        <h5 class="card-title">
+                            <a href="https://www.who.int/news-room/fact-sheets/detail/tuberculosis" target="_blank" rel="noopener noreferrer" class="stretched-link text-decoration-none text-dark">
+                                TB Menyerang 10 Juta Orang
+                            </a>
+                        </h5>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="card">
+                    <div class="card-body">
+                        <i class="fas fa-shield-alt fa-3x text-primary mb-3"></i>
+                        <h5 class="card-title">
+                            <a href="https://www.alodokter.com/6-cara-mencegah-tbc-yang-efektif-dan-perlu-dilakukan" target="_blank" rel="noopener noreferrer" class="stretched-link text-decoration-none text-dark">
+                                Pencegahan Dapat Mengurangi Risiko
+                            </a>
+                        </h5>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Slider Section -->
+    <section class="container my-5">
+        <div id="symptomSlider" class="carousel slide" data-bs-ride="carousel">
+            <div class="carousel-inner">
+                <div class="carousel-item active">
+                    <img src="{{ url_for('static', filename='img/1.jpg') }}" class="d-block w-100" alt="Gejala Batuk">
+                    <div class="carousel-caption d-none d-md-block">
+                        <h5>Batuk Lebih dari 2 Minggu</h5>
+                        <p>Salah satu gejala utama tuberkulosis adalah batuk yang tidak kunjung sembuh.</p>
+                    </div>
+                </div>
+                <div class="carousel-item">
+                    <img src="{{ url_for('static', filename='img/2.jpg') }}" class="d-block w-100" alt="Gejala Demam">
+                    <div class="carousel-caption d-none d-md-block">
+                        <h5>Demam dan Berkeringat di Malam Hari</h5>
+                        <p>Demam yang tidak jelas penyebabnya bisa menjadi indikasi infeksi TB.</p>
+                    </div>
+                </div>
+                <div class="carousel-item">
+                    <img src="{{ url_for('static', filename='img/3.jpg') }}" class="d-block w-100" alt="Penurunan Berat Badan">
+                    <div class="carousel-caption d-none d-md-block">
+                        <h5>Penurunan Berat Badan Drastis</h5>
+                        <p>Kehilangan nafsu makan yang berujung pada penurunan berat badan tanpa sebab.</p>
+                    </div>
+                </div>
+            </div>
+            <button class="carousel-control-prev" type="button" data-bs-target="#symptomSlider" data-bs-slide="prev">
+                <span class="carousel-control-prev-icon" aria-hidden="true"></span>
+                <span class="visually-hidden">Previous</span>
+            </button>
+            <button class="carousel-control-next" type="button" data-bs-target="#symptomSlider" data-bs-slide="next">
+                <span class="carousel-control-next-icon" aria-hidden="true"></span>
+                <span class="visually-hidden">Next</span>
+            </button>
+        </div>
+    </section>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+        <script>
+            var myCarousel = document.querySelector('#symptomSlider');
+            var carousel = new bootstrap.Carousel(myCarousel, {
+                interval: 5000, // 5 seconds
+                wrap: true
+            });
+        </script>
+    
+                <!-- Popover Content -->
+                <div id="popover-content" class="d-none">
+                    <div id="chat-messages-popover">
+                        <div class="bot-message">Halo! Ada yang bisa saya bantu?</div>
+                    </div>
+                    <div class="chat-input-area">
+                        <input type="text" id="chat-input-popover" class="form-control" placeholder="Ketik pesan...">
+                        <button id="chat-send-popover"><i class="fas fa-paper-plane"></i></button>
+                    </div>
+                </div>
+            
+                <script>
+                    // Popover Chat functionality
+                    document.addEventListener('DOMContentLoaded', function () {
+                        const popoverTriggerEl = document.getElementById('ask-ai-popover');
+                        if (popoverTriggerEl) {
+                            const popover = new bootstrap.Popover(popoverTriggerEl, {
+                                html: true,
+                                placement: 'bottom',
+                                sanitize: false, // We are providing trusted content
+                                customClass: 'chat-popover', // Custom class for styling
+                                content: function () {
+                                    return document.getElementById('popover-content').innerHTML;
+                                }
+                            });
+
+                            const handleOutsideClick = (event) => {
+                                // Close popover if click is outside of the popover and not on the trigger element
+                                if (!popoverTriggerEl.contains(event.target) && !document.querySelector('.popover')?.contains(event.target)) {
+                                    popover.hide();
+                                }
+                            };
+
+                            popoverTriggerEl.addEventListener('shown.bs.popover', function () {
+                                // Add listener for outside clicks
+                                document.addEventListener('click', handleOutsideClick);
+
+                                const chatInputPopover = document.querySelector('.popover-body #chat-input-popover');
+                                const chatSendPopover = document.querySelector('.popover-body #chat-send-popover');
+                                const chatMessagesPopover = document.querySelector('.popover-body #chat-messages-popover');
+            
+                                const sendMessagePopover = () => {
+                                    if (!chatInputPopover || !chatMessagesPopover) return;
+                                    const messageText = chatInputPopover.value.trim();
+                                    if (messageText === '') return;
+            
+                                    const userMessageElem = document.createElement('div');
+                                    userMessageElem.className = 'chat-message user-message';
+                                    userMessageElem.textContent = messageText;
+                                    chatMessagesPopover.appendChild(userMessageElem);
+                                    
+                                    chatInputPopover.value = '';
+                                    chatMessagesPopover.scrollTop = chatMessagesPopover.scrollHeight;
+            
+                                    fetch('/api/chat', {
+                                        method: 'POST',
+                                        headers: { 'Content-Type': 'application/json' },
+                                        body: JSON.stringify({ message: messageText }),
+                                    })
+                                    .then(response => response.json())
+                                    .then(data => {
+                                        const botMessageElem = document.createElement('div');
+                                        botMessageElem.className = 'chat-message bot-message';
+                                        botMessageElem.innerHTML = marked.parse(data.response || "Maaf, terjadi kesalahan.");
+                                        chatMessagesPopover.appendChild(botMessageElem);
+                                        chatMessagesPopover.scrollTop = chatMessagesPopover.scrollHeight;
+                                    })
+                                    .catch((error) => {
+                                        console.error('Error:', error);
+                                    });
+                                };
+            
+                                if (chatSendPopover) {
+                                    chatSendPopover.onclick = sendMessagePopover;
+                                }
+                                if (chatInputPopover) {
+                                    chatInputPopover.onkeypress = (e) => {
+                                        if (e.key === 'Enter') {
+                                            sendMessagePopover();
+                                        }
+                                    };
+                                }
+                            });
+
+                            popoverTriggerEl.addEventListener('hidden.bs.popover', function () {
+                                // Remove listener when popover is hidden
+                                document.removeEventListener('click', handleOutsideClick);
+                            });
+                        }
+            
+                        // Ensure chat message styles are present
+                        if (!document.getElementById('chat-styles')) {
+                            const style = document.createElement('style');
+                            style.id = 'chat-styles';
+                            style.innerHTML = `
+                                .chat-popover {
+                                    width: 360px; 
+                                    border-radius: 0.75rem;
+                                    border: none;
+                                    box-shadow: 0 8px 30px rgba(0, 0, 0, 0.12);
+                                }
+                                .popover-header {
+                                    background-color: #f8f9fa;
+                                    border-bottom: 1px solid #dee2e6;
+                                    font-weight: 600;
+                                    font-size: 1rem;
+                                }
+                                .popover-body { 
+                                    padding: 0; 
+                                }
+                                #chat-messages-popover {
+                                    height: 300px; 
+                                    overflow-y: auto; 
+                                    display: flex; 
+                                    flex-direction: column; 
+                                    gap: 12px; 
+                                    padding: 16px;
+                                }
+                                #chat-messages-popover::-webkit-scrollbar { width: 6px; }
+                                #chat-messages-popover::-webkit-scrollbar-track { background: #f1f1f1; }
+                                #chat-messages-popover::-webkit-scrollbar-thumb { background: #888; border-radius: 3px; }
+                                #chat-messages-popover::-webkit-scrollbar-thumb:hover { background: #555; }
+                                .chat-message { 
+                                    padding: 10px 15px; 
+                                    border-radius: 20px; 
+                                    max-width: 85%; 
+                                    word-wrap: break-word;
+                                }
+                                .user-message { 
+                                    background-image: linear-gradient(to right, #0d6efd, #0a58ca);
+                                    color: white; 
+                                    align-self: flex-end; 
+                                    border-bottom-right-radius: 5px;
+                                }
+                                .bot-message { 
+                                    background-color: #e9ecef; 
+                                    color: #343a40; 
+                                    align-self: flex-start; 
+                                    border-bottom-left-radius: 5px;
+                                }
+                                .chat-input-area {
+                                    display: flex;
+                                    align-items: center;
+                                    padding: 10px;
+                                    border-top: 1px solid #dee2e6;
+                                }
+                                #chat-input-popover {
+                                    border: none;
+                                    background-color: transparent;
+                                    flex-grow: 1;
+                                    padding: 8px;
+                                }
+                                #chat-input-popover:focus {
+                                    outline: none;
+                                    box-shadow: none;
+                                }
+                                #chat-send-popover {
+                                    background: none;
+                                    border: none;
+                                    color: #007bff;
+                                    font-size: 1.2rem;
+                                    padding: 5px 10px;
+                                    transition: color 0.2s;
+                                }
+                                #chat-send-popover:hover {
+                                    color: #0056b3;
+                                }
+                            `;
+                            document.head.appendChild(style);
+                        }
+                    });
+                </script>
+            </body>
+            </html>

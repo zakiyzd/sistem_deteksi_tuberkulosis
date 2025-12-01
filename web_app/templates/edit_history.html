@@ -1,0 +1,217 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <title>Edit Riwayat Diagnosis</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background-color: #e9ecef; margin: 0; padding: 40px; display: flex; justify-content: center; }
+        .container { max-width: 800px; width: 100%; margin: auto; background: #fff; padding: 40px; border-radius: 12px; box-shadow: 0 10px 20px rgba(0,0,0,0.15); }
+        h2 { text-align: center; color: #007bff; margin-bottom: 30px; }
+        label { font-weight: 600; margin-top: 15px; display: block; }
+        input, select, textarea { width: 100%; padding: 10px; margin-top: 5px; margin-bottom: 15px; border-radius: 4px; border: 1px solid #ccc; box-sizing: border-box; }
+        .btn { padding: 0 15px; color: white; border: none; border-radius: 5px; cursor: pointer; text-decoration: none; display: inline-block; font-size: 1em; vertical-align: middle; box-sizing: border-box; height: 35px; line-height: 35px; }
+        .btn-submit { background-color: #28a745; }
+        .btn-cancel { background-color: #6c757d; }
+        hr { border: 0; border-top: 1px solid #dee2e6; margin: 25px 0; }
+        .readonly-section p { background-color: #f8f9fa; padding: 10px; border-radius: 4px; }
+        .readonly-section img { border: 1px solid #dee2e6; border-radius: 4px; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h2>Edit Riwayat Diagnosis</h2>
+        <form method="POST" action="{{ url_for('edit_history', history_id=item.id) }}">
+            <h4>Data Pasien</h4>
+            <label for="patient_name">Nama Lengkap</label>
+            <input id="patient_name" type="text" name="patient_name" value="{{ item.patient_name }}" required>
+            
+            <label for="patient_age">Umur (thn)</label>
+            <input id="patient_age" type="number" name="patient_age" value="{{ item.patient_age }}" min="1" required>
+
+            <label for="patient_id">ID Pasien/No. RM</label>
+            <input id="patient_id" type="text" name="patient_id" value="{{ item.patient_id }}" required>
+
+            <label for="patient_gender">Jenis Kelamin</label>
+            <select id="patient_gender" name="patient_gender" required>
+                <option value="Laki-laki" {% if item.patient_gender == 'Laki-laki' %}selected{% endif %}>Laki-laki</option>
+                <option value="Perempuan" {% if item.patient_gender == 'Perempuan' %}selected{% endif %}>Perempuan</option>
+            </select>
+
+            <label for="patient_address">Alamat Lengkap</label>
+            <textarea id="patient_address" name="patient_address">{{ item.patient_address }}</textarea>
+
+            <hr>
+            <div class="readonly-section">
+                <h4>Hasil Diagnosis (Tidak dapat diubah)</h4>
+                <p><strong>Diagnosis AI:</strong> {{ item.prediction_result }}</p>
+                <p><strong>Keyakinan:</strong> {{ item.confidence }}</p>
+                <p><strong>Gambar:</strong> <a href="{{ item.image_path }}" target="_blank">Lihat Gambar</a></p>
+                <img src="{{ item.image_path }}" style="max-width: 200px; margin-top: 10px;">
+            </div>
+
+            <hr>
+            <button type="submit" class="btn btn-submit">Simpan Perubahan</button>
+            <a href="{{ url_for('deteksi') }}" class="btn btn-cancel">Batal</a>
+        </form>
+    </div>
+
+    <!-- Chatbot Widget -->
+    <style>
+        #chat-icon {
+            position: fixed;
+            bottom: 25px;
+            right: 25px;
+            width: 60px;
+            height: 60px;
+            background-color: #007bff;
+            color: white;
+            border-radius: 50%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-size: 28px;
+            cursor: pointer;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+            z-index: 1000;
+        }
+        #chat-window {
+            position: fixed;
+            bottom: 100px;
+            right: 25px;
+            width: 350px;
+            height: 450px;
+            background-color: white;
+            border-radius: 15px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.3);
+            display: none;
+            flex-direction: column;
+            z-index: 1001;
+            overflow: hidden;
+        }
+        #chat-header {
+            padding: 15px;
+            background-color: #007bff;
+            color: white;
+            font-weight: bold;
+            border-bottom: 1px solid #ddd;
+        }
+        #chat-messages {
+            flex-grow: 1;
+            padding: 15px;
+            overflow-y: auto;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+        .chat-message {
+            padding: 8px 12px;
+            border-radius: 18px;
+            max-width: 80%;
+        }
+        .user-message {
+            background-color: #007bff;
+            color: white;
+            align-self: flex-end;
+        }
+        .bot-message {
+            background-color: #f1f1f1;
+            color: black;
+            align-self: flex-start;
+        }
+        #chat-input-container {
+            display: flex;
+            padding: 10px;
+            border-top: 1px solid #ddd;
+        }
+        #chat-input {
+            flex-grow: 1;
+            border: 1px solid #ccc;
+            border-radius: 20px;
+            padding: 8px 15px;
+            margin-right: 10px;
+        }
+        #chat-send {
+            background: none;
+            border: none;
+            font-size: 20px;
+            color: #007bff;
+            cursor: pointer;
+        }
+    </style>
+
+    <div id="chat-icon">
+        <i class="far fa-comments"></i>
+    </div>
+
+    <div id="chat-window">
+        <div id="chat-header">AI Assistant</div>
+        <div id="chat-messages">
+             <div class="bot-message">Halo! Ada yang bisa saya bantu?</div>
+        </div>
+        <div id="chat-input-container">
+            <input type="text" id="chat-input" placeholder="Ketik pesan...">
+            <button id="chat-send"><i class="fas fa-paper-plane"></i></button>
+        </div>
+    </div>
+
+    <script>
+        const chatIcon = document.getElementById('chat-icon');
+        const chatWindow = document.getElementById('chat-window');
+        const chatInput = document.getElementById('chat-input');
+        const chatSend = document.getElementById('chat-send');
+        const chatMessages = document.getElementById('chat-messages');
+
+        chatIcon.addEventListener('click', () => {
+            const isHidden = chatWindow.style.display === 'none' || chatWindow.style.display === '';
+            chatWindow.style.display = isHidden ? 'flex' : 'none';
+        });
+
+        const sendMessage = () => {
+            const messageText = chatInput.value.trim();
+            if (messageText === '') return;
+
+            // Display user message
+            const userMessageElem = document.createElement('div');
+            userMessageElem.classList.add('chat-message', 'user-message');
+            userMessageElem.textContent = messageText;
+            chatMessages.appendChild(userMessageElem);
+            
+            chatInput.value = '';
+            chatMessages.scrollTop = chatMessages.scrollHeight;
+
+            // Send message to backend
+            fetch('/api/chat', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ message: messageText }),
+            })
+            .then(response => response.json())
+            .then(data => {
+                const botMessageElem = document.createElement('div');
+                botMessageElem.classList.add('chat-message', 'bot-message');
+                botMessageElem.textContent = data.response || "Maaf, terjadi kesalahan.";
+                chatMessages.appendChild(botMessageElem);
+                chatMessages.scrollTop = chatMessages.scrollHeight;
+            })
+            .catch((error) => {
+                console.error('Error:', error);
+                const botMessageElem = document.createElement('div');
+                botMessageElem.classList.add('chat-message', 'bot-message');
+                botMessageElem.textContent = "Gagal terhubung ke server. Silakan coba lagi.";
+                chatMessages.appendChild(botMessageElem);
+                chatMessages.scrollTop = chatMessages.scrollHeight;
+            });
+        };
+
+        chatSend.addEventListener('click', sendMessage);
+        chatInput.addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') {
+                sendMessage();
+            }
+        });
+    </script>
+</body>
+</html>

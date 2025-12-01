@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <title>Daftar Akun - Sistem Deteksi TB</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        /* Gaya CSS disederhanakan untuk kemudahan */
+        body { font-family: Arial, sans-serif; background-color: #f4f4f4; display: flex; justify-content: center; align-items: center; height: 100vh; margin: 0;}
+        .container { width: 350px; padding: 30px; background: #fff; border-radius: 8px; box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1); text-align: center;}
+        h2 { color: #007bff; margin-bottom: 25px; font-weight: bold;}
+        input[type="text"], input[type="password"] { width: 100%; padding: 12px; margin-bottom: 15px; border: 1px solid #ccc; border-radius: 5px; box-sizing: border-box; }
+        button { width: 100%; padding: 12px; background-color: #28a745; color: white; border: none; border-radius: 5px; cursor: pointer; font-size: 1em; transition: background-color 0.3s;}
+        button:hover { background-color: #218838;}
+        .flash-message { padding: 10px; margin-bottom: 15px; border-radius: 5px; font-size: 0.9em;}
+        .flash-message.error { background-color: #f8d7da; color: #721c24; border: 1px solid #f5c6cb;}
+        .flash-message.success { background-color: #d4edda; color: #155724; border: 1px solid #c3e6cb;}
+        .error-message { color: #dc3545; font-size: 0.85em; margin-bottom: 10px; text-align: left;}
+        a { color: #007bff; text-decoration: none;}
+        a:hover { text-decoration: underline;}
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h2>Daftar Akun Pengguna Klinis</h2>
+
+        {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+                {% for category, message in messages %}
+                    <div class="flash-message {{ category }}">{{ message }}</div>
+                {% endfor %}
+            {% endif %}
+        {% endwith %}
+
+        <form method="POST" action="{{ url_for('register') }}">
+            {{ form.hidden_tag() }} 
+            
+            {{ form.username(placeholder="Username", class="form-control") }}
+            {% for error in form.username.errors %}
+                <div class="error-message">{{ error }}</div>
+            {% endfor %}
+
+            {{ form.password(placeholder="Password (min. 6 karakter)", class="form-control") }}
+            {% for error in form.password.errors %}
+                <div class="error-message">{{ error }}</div>
+            {% endfor %}
+
+            {{ form.confirm_password(placeholder="Konfirmasi Password", class="form-control") }}
+            {% for error in form.confirm_password.errors %}
+                <div class="error-message">{{ error }}</div>
+            {% endfor %}
+            
+            <button type="submit">Daftar</button>
+        </form>
+
+        <p style="margin-top: 20px; font-size: 0.85em;">
+            Sudah punya akun? <a href="{{ url_for('login') }}">Login di sini</a>
+        </p>
+    </div>
+
+</body>
+</html>

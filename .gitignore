@@ -1,0 +1,18 @@
+# Python
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+
+# Data & Model Besar
+data/all_image/
+web_app/tb_resnet_best.h5
+
+# Fail aplikasi web sementara & pangkalan data
+web_app/instance/
+web_app/static/original_*
+web_app/static/temp_*
+
+# Fail lain
+*.doc
+.vscode/
